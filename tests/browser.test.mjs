@@ -204,8 +204,8 @@ test('Loja da Gigi no Chromium', { timeout: 90000 }, async t => {
     await metric('stockCost', '78,00');
     assert.equal(await evaluate('document.activeElement.id'), 'chooseSamuel');
     assert.equal(await evaluate('document.styleSheets.length'), 1);
-    await click('chooseGiovana');
-    await waitForText('greeting', 'Olá, Giovana!');
+    await click('chooseGiovanna');
+    await waitForText('greeting', 'Olá, Giovanna!');
     for (const width of [320, 390, 768]) {
       await page.client.send('Emulation.setDeviceMetricsOverride', { width, height: 800, deviceScaleFactor: 1, mobile: true });
       assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true);
@@ -295,7 +295,15 @@ test('Loja da Gigi no Chromium', { timeout: 90000 }, async t => {
     const before = await snapshot();
     await page.navigate(site.url);
     assert.deepEqual(await snapshot(), before);
-    assert.equal(await text('greeting'), 'Olá, Giovana!');
+    assert.equal(await text('greeting'), 'Olá, Giovanna!');
+    const storedWithOldName = JSON.stringify({ ...before, profile: 'Giovana' });
+    await evaluate(`localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(storedWithOldName)})`);
+    await page.navigate(site.url);
+    assert.equal(await text('greeting'), 'Olá, Giovanna!');
+    assert.equal(await evaluate('document.getElementById("userChoice").value'), 'Giovanna');
+    await fill('userChoice', 'Giovanna');
+    await waitForText('toast', 'Nome salvo');
+    assert.deepEqual(await snapshot(), before);
     assert.equal(await evaluate('document.querySelector("#debtList button") === null'), true);
 
     const date = await evaluate('document.getElementById("dateFrom").value');
@@ -346,9 +354,10 @@ test('Loja da Gigi no Chromium', { timeout: 90000 }, async t => {
     await click('closeRestore');
     assert.equal((await snapshot()).flavors.at(-1).qty, 2);
 
-    for (let i = 0; i < 2; i++) {
+    const backupWithOldName = signBackup({ ...backup, state: { ...backup.state, profile: 'Giovana' } });
+    for (const source of [backupWithOldName, backup]) {
       await evaluate('document.getElementById("toast").textContent = ""');
-      await loadBackup(backup);
+      await loadBackup(source);
       await until(() => evaluate('document.getElementById("restoreDialog").open'), Boolean, 'a prévia do backup');
       await fill('restoreInput', 'RESTAURAR');
       await submit('restoreForm');

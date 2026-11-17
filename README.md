@@ -4,7 +4,7 @@ Controle de estoque, vendas e fiados em HTML, CSS e JavaScript. A loja salva os 
 
 ## Vendas e estoque
 
-1. Escolha Samuel ou Giovana no primeiro acesso. O seletor no topo permite trocar a saudação.
+1. Escolha Samuel ou Giovanna no primeiro acesso. O seletor no topo permite trocar a saudação.
 2. Cadastre, edite ou reponha sabores em **Estoque e sabores**. A primeira abertura contém 13 sabores e 26 unidades de exemplo. Ajuste os saldos antes de iniciar a operação.
 3. Em **Nova venda**, escolha os sabores e as quantidades. Em **Como definir o preço**, use **Preço por unidade** para editar o valor de cada sabor ou **Total manual** para informar um valor combinado. Nos dois casos é possível aplicar desconto no total.
 4. **Promoção por quantidade** aplica R$ 15,00 para uma unidade, R$ 26,00 para duas e R$ 30,00 para três. A quantidade é a soma de todos os sabores na venda. A partir de quatro unidades, escolha uma das opções manuais. A prévia mostra quantidade, preço, desconto, total e ganho estimado.
@@ -30,7 +30,7 @@ Cancelamentos ficam no histórico, mas saem dos indicadores, inclusive nos perí
 
 ## Exportação e backup
 
-- **CSV** usa o intervalo selecionado no fechamento, UTF-8 com BOM e ponto e vírgula como separador. O intervalo faz parte do nome do arquivo. Cada item de venda tem sua própria linha de receita e custo, e cada pagamento tem sua própria linha de recebimento. Para consolidar relatórios sobrepostos de Samuel e Giovana, use **ID do registro** como chave e mantenha a linha da exportação mais recente. Use **ID da venda** para relacionar itens e recebimentos. As vendas canceladas preservam os valores originais para consulta e têm zero nas colunas financeiras.
+- **CSV** usa o intervalo selecionado no fechamento, UTF-8 com BOM e ponto e vírgula como separador. O intervalo faz parte do nome do arquivo. Cada item de venda tem sua própria linha de receita e custo, e cada pagamento tem sua própria linha de recebimento. Para consolidar relatórios sobrepostos de Samuel e Giovanna, use **ID do registro** como chave e mantenha a linha da exportação mais recente. Use **ID da venda** para relacionar itens e recebimentos. As vendas canceladas preservam os valores originais para consulta e têm zero nas colunas financeiras.
 - **JSON** guarda estoque, preços, configurações, perfil, vendas e pagamentos. O nome do arquivo inclui data e hora. O formato 6 valida os campos e usa SHA-256 para detectar alterações no conteúdo. A página mostra quando o último download foi iniciado neste navegador. Confirme que o arquivo foi salvo e guarde uma cópia antes de trocar de aparelho, limpar o navegador ou mudar de endereço.
 - **Restauração** valida o arquivo e mostra quantos sabores, vendas e pagamentos serão carregados. Baixe a cópia local antes de confirmar a substituição digitando **RESTAURAR**. Restaurar o mesmo arquivo novamente mantém os mesmos IDs e quantidades.
 - A versão 1.1 abre dados locais dos formatos 2 a 5 e importa backups JSON 4 e 5. IDs e valores históricos são preservados. As vendas das versões 2 e 3, que usavam valores fixos, são recuperadas a R$ 8,00 por unidade e custo de R$ 3,00. Se os dados locais estiverem ilegíveis, a página bloqueia edições e oferece baixar a cópia bruta.

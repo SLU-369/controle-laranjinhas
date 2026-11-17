@@ -12,7 +12,8 @@ import {
   const LAST_BACKUP = 'loja-gigi-last-backup';
   const OLD_STORES = ['loja-gigi-v4', 'laranjinhas-estoque-vendas-v3', 'laranjinhas-estoque-vendas-v2'];
   const OLD_PROFILE = 'loja-gigi-profile';
-  const PROFILES = ['', 'Samuel', 'Giovana'];
+  const PROFILES = ['', 'Samuel', 'Giovanna'];
+  const normalizeProfile = profile => profile === 'Giovana' ? 'Giovanna' : profile;
   const MAX_FLAVORS = 2000;
   const MAX_SALES = 100000;
   const FILE_LIMIT = 8 * 1024 * 1024;
@@ -190,8 +191,9 @@ import {
   }
 
   function validateState(data) {
+    const profile = normalizeProfile(data?.profile);
     if (!hasKeys(data, ['version', 'profile', 'settings', 'flavors', 'sales']) ||
-        data.version !== VERSION || !PROFILES.includes(data.profile) ||
+        data.version !== VERSION || !PROFILES.includes(profile) ||
         !hasKeys(data.settings, ['defaultPriceCents', 'unitCostCents']) ||
         !validPrice(data.settings.defaultPriceCents) || !validCents(data.settings.unitCostCents) ||
         !Array.isArray(data.flavors) || data.flavors.length > MAX_FLAVORS ||
@@ -210,7 +212,7 @@ import {
       if (!validSale(sale, flavorIds) || saleIds.has(sale.id)) throw Error('O arquivo contém uma venda inválida ou com ID repetido.');
       saleIds.add(sale.id);
     }
-    return data;
+    return profile === data.profile ? data : { ...data, profile };
   }
 
   function legacyTime(value) {
@@ -296,7 +298,8 @@ import {
     try {
       savedSnapshot = storageSnapshot();
       const { raw, version, profile } = savedSnapshot;
-      const oldProfile = PROFILES.includes(profile) ? profile : '';
+      const normalized = normalizeProfile(profile);
+      const oldProfile = PROFILES.includes(normalized) ? normalized : '';
       if (raw === null) {
         state = initialState(oldProfile);
       } else {
@@ -1234,7 +1237,7 @@ import {
     $('restoreForm').addEventListener('submit', restoreData);
     $('userChoice').addEventListener('change', event => chooseProfile(event.target.value));
     $('chooseSamuel').addEventListener('click', () => chooseProfile('Samuel'));
-    $('chooseGiovana').addEventListener('click', () => chooseProfile('Giovana'));
+    $('chooseGiovanna').addEventListener('click', () => chooseProfile('Giovanna'));
     $('skipProfile').addEventListener('click', () => $('profileDialog').close());
     window.addEventListener('storage', event => {
       if (event.key === LAST_BACKUP) renderBackupDate();
