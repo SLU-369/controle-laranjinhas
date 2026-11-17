@@ -1,49 +1,53 @@
-# Loja da Gigi
+# Loja da Gigi · 1.1
 
-Aplicação estática em HTML5, CSS3 e JavaScript para controlar estoque de geladinhos, vendas e fiados. Abre no celular ou no computador e salva os dados no `localStorage` do navegador.
+Controle de estoque, vendas e fiados em HTML, CSS e JavaScript. A loja salva os dados no navegador e está hospedada no [Cloudflare Pages](https://loja-da-gigi.pages.dev/).
 
-## Uso
+## Vendas e estoque
 
-1. Escolha Samuel ou Giovana para personalizar a saudação. O seletor no topo permite trocar o nome.
-2. Em **Estoque e sabores**, cadastre sabores e defina quantidade e preço. Use **+1 un.** para repor uma unidade ou **Editar** para alterar nome, preço e saldo disponível. A primeira abertura mostra 13 sabores e 26 unidades de exemplo, que podem ser ajustados antes de começar.
-3. Em **Nova venda**, selecione o sabor e a quantidade. Use o preço sugerido pelo cadastro ou defina um preço para a venda. Para desconto por quantidade, ajuste o preço unitário ou informe um desconto no total. O total deve ficar acima de zero.
-4. Escolha Pix, crédito, débito, dinheiro ou fiado. Para fiado, informe o telefone do comprador com DDD. Quando receber, selecione a modalidade em **Fiados em aberto** e confirme a quitação.
-5. Use **Histórico de vendas** para consultar valores e pagamentos. O cancelamento devolve as unidades ao estoque, mantém o registro da operação e retira seus valores dos indicadores. Para vendas pagas, faça o estorno pelo meio utilizado antes de confirmar o cancelamento no app.
+1. Escolha Samuel ou Giovana no primeiro acesso. O seletor no topo permite trocar a saudação.
+2. Cadastre, edite ou reponha sabores em **Estoque e sabores**. A primeira abertura contém 13 sabores e 26 unidades de exemplo. Ajuste os saldos antes de iniciar a operação.
+3. Em **Nova venda**, escolha os sabores e as quantidades. Em **Como definir o preço**, use **Preço por unidade** para editar o valor de cada sabor ou **Total manual** para informar um valor combinado. Nos dois casos é possível aplicar desconto no total.
+4. **Promoção por quantidade** aplica R$ 15,00 para uma unidade, R$ 26,00 para duas e R$ 30,00 para três. A quantidade é a soma de todos os sabores na venda. A partir de quatro unidades, escolha uma das opções manuais. A prévia mostra quantidade, preço, desconto, total e ganho estimado.
+5. Selecione Pix, crédito, débito, dinheiro ou fiado. O fiado exige telefone com DDD e aceita nome opcional. Em **Fiados em aberto**, selecione como recebeu e informe o valor para registrar uma parcela. Deixe o valor vazio para quitar o saldo. O histórico mantém cada valor, modalidade e data de recebimento.
+6. Cancelar uma venda devolve todas as unidades ao estoque e mantém seu registro. Estorne os pagamentos externamente antes de cancelar, inclusive parcelas de fiado já recebidas.
 
-## Indicadores
+O custo padrão é R$ 3,00 por unidade e pode ser alterado. Cada item guarda o nome do sabor, preço, desconto e custo aplicados na venda. No total manual, o valor combinado é rateado pela quantidade. O desconto manual é rateado pelo subtotal de cada item. O rateio preserva o valor exato em centavos.
 
-| Indicador | Como é calculado |
+## Indicadores e fechamento de caixa
+
+| Indicador | Regra |
 | --- | --- |
-| Receita bruta de vendas | Quantidade × preço aplicado − desconto. Inclui fiados em aberto e exclui cancelamentos. |
-| Custo dos produtos vendidos | Quantidade vendida × custo registrado na venda. O custo começa em R$ 3,00 por unidade e pode ser alterado em **Configuração de valores**. |
-| Lucro bruto estimado | Receita bruta − custo dos produtos vendidos. Taxas, transporte e outras despesas ficam fora do cálculo. |
-| Recebido e a receber | Os pagamentos imediatos e os fiados quitados compõem o recebido. Os fiados em aberto compõem o saldo a receber. A quitação altera esses saldos sem gerar uma segunda receita. Cobranças de cartão são registradas pelo valor da venda, sem conciliação de taxas ou repasses. |
-| Estoque potencial | A receita potencial usa o preço atual de cada sabor. O custo estimado usa o custo unitário atual para as unidades disponíveis. A diferença é o lucro bruto potencial. |
+| Receita bruta | Valor vendido após descontos, incluindo fiados. |
+| Total recebido | Pagamentos registrados por Pix, crédito, débito, dinheiro e modalidades legadas desconhecidas. O app registra valores de cartão antes de taxas e sem conciliação de repasses. |
+| Custo dos produtos vendidos | Quantidade vendida × custo unitário registrado em cada item. |
+| Ganho estimado nas vendas | Receita bruta menos o custo dos produtos vendidos, antes de taxas e outras despesas. |
+| Fiados pendentes | Saldo em aberto após os recebimentos contabilizados. |
+| Receita potencial do estoque | Quantidade disponível × preço atual de cada sabor. |
 
-Cada venda guarda o preço, o desconto, o custo e o nome do sabor no momento do registro. Alterações de cadastro afetam as próximas vendas.
+Use **Hoje**, **Semana** (segunda a domingo), **Mês** ou **Período personalizado**. Os intervalos são inclusivos e usam o fuso do aparelho. Vendas entram pela data da venda, pagamentos pela data do recebimento. A linha de fiados anteriores ao período destaca pagamentos de vendas feitas antes da data inicial. O saldo pendente considera o fim do período, inclusive para vendas anteriores. Para registros antigos com recebimento sem data, o valor entra no saldo e aparece como recebido na consulta sem datas.
 
-## Relatórios e backup
+Cancelamentos ficam no histórico, mas saem dos indicadores, inclusive nos períodos anteriores. O fechamento é uma consulta ao histórico atual. Os gráficos mostram os cinco sabores mais vendidos e até 12 datas ou meses com vendas.
 
-- **CSV** exporta o histórico com um intervalo inclusivo no fuso do aparelho. Para um único dia, use a mesma data em **De** e **Até**. Limpe os dois campos para exportar tudo. O filtro usa a data da venda e o arquivo mostra a situação atual, a data de recebimento e o cancelamento. Cancelamentos mantêm o valor original para consulta e têm zero nas colunas dos indicadores. O CSV usa UTF-8 com BOM e ponto e vírgula como separador.
-- **Backup JSON** guarda estoque, preços, custo, perfil e histórico completo, incluindo fiados quitados e vendas canceladas. Baixe uma cópia periodicamente e antes de trocar de aparelho, limpar o navegador ou mudar o endereço do site.
-- **Importar backup** valida primeiro o arquivo e rejeita inconsistências e IDs repetidos. A prévia mostra quantos registros serão substituídos e oferece baixar os dados locais. Para aplicar, digite **RESTAURAR** e confirme. A restauração carrega o conteúdo integral do arquivo. Importar o mesmo arquivo novamente mantém a mesma quantidade de registros.
-- O app lê dados locais das versões 2 a 4 e aceita backups JSON da versão 4. Nas versões 2 e 3, que usavam valores fixos, as vendas são recuperadas com os valores originais de R$ 8,00 por unidade e R$ 3,00 de custo. Quando falta a modalidade de um registro antigo, ela aparece como desconhecida. Se o app não conseguir ler os dados locais, ele bloqueia as edições e oferece baixar a cópia bruta antes de restaurar.
-- **Restaurar dados iniciais** reinicia estoque e configurações e apaga o histórico depois de confirmação explícita. Faça backup antes.
+## Exportação e backup
 
-### Armazenamento e privacidade
+- **CSV** usa o intervalo selecionado no fechamento, UTF-8 com BOM e ponto e vírgula como separador. O intervalo faz parte do nome do arquivo. Cada item de venda tem sua própria linha de receita e custo, e cada pagamento tem sua própria linha de recebimento. Para consolidar relatórios sobrepostos de Samuel e Giovana, use **ID do registro** como chave e mantenha a linha da exportação mais recente. Use **ID da venda** para relacionar itens e recebimentos. As vendas canceladas preservam os valores originais para consulta e têm zero nas colunas financeiras.
+- **JSON** guarda estoque, preços, configurações, perfil, vendas e pagamentos. O nome do arquivo inclui data e hora. O formato 6 valida os campos e usa SHA-256 para detectar alterações no conteúdo. A página mostra quando o último download foi iniciado neste navegador. Confirme que o arquivo foi salvo e guarde uma cópia antes de trocar de aparelho, limpar o navegador ou mudar de endereço.
+- **Restauração** valida o arquivo e mostra quantos sabores, vendas e pagamentos serão carregados. Baixe a cópia local antes de confirmar a substituição digitando **RESTAURAR**. Restaurar o mesmo arquivo novamente mantém os mesmos IDs e quantidades.
+- A versão 1.1 abre dados locais dos formatos 2 a 5 e importa backups JSON 4 e 5. IDs e valores históricos são preservados. As vendas das versões 2 e 3, que usavam valores fixos, são recuperadas a R$ 8,00 por unidade e custo de R$ 3,00. Se os dados locais estiverem ilegíveis, a página bloqueia edições e oferece baixar a cópia bruta.
+- **Restaurar dados iniciais** repõe o estoque inicial e apaga o histórico após confirmação digitada.
 
-O armazenamento é separado por origem, navegador e perfil do navegador. A versão local e a publicada têm dados separados. A limpeza dos dados do site e o modo privado podem apagar registros. Web Locks serializa as escritas entre abas nos navegadores que oferecem esse recurso. Use uma aba por vez se o recurso estiver indisponível.
+## Armazenamento e acesso
 
-O site pode ser aberto publicamente, e qualquer pessoa com acesso ao mesmo perfil do navegador pode acessar os dados locais. A seleção de Samuel ou Giovana personaliza a saudação; ambos usam o mesmo cadastro naquele navegador. O app não transmite nem criptografa o histórico. Guarde os arquivos CSV e JSON de forma privada, especialmente porque podem conter telefones de clientes. Nunca coloque arquivos de produção no repositório.
+O armazenamento é isolado por endereço, navegador e perfil do navegador. O nome na saudação personaliza a sessão visual. Qualquer pessoa com acesso ao mesmo perfil do navegador pode abrir os dados locais. O app usa Web Locks quando disponível para serializar gravações entre abas. Em navegadores sem esse recurso, use uma aba por vez.
 
-Uma evolução para backend, banco de dados e SaaS poderia oferecer contas individuais, sincronização, backups administrados e controle de acesso.
+Os dados e arquivos exportados podem conter nome e telefone de compradores. Guarde-os em local privado. O modo privado e a limpeza dos dados do site podem apagar o histórico. A versão 1.1 funciona via HTTPS ou localhost. A instalação como PWA e o funcionamento offline ficaram fora desta versão para manter o carregamento e as atualizações simples.
 
 ## Execução local e testes
 
-O site não precisa de instalação nem de build. Com Python disponível, abra um terminal na raiz do projeto, execute `py -m http.server 8000 --bind 127.0.0.1` (Windows) ou `python3 -m http.server 8000 --bind 127.0.0.1` e abra `http://127.0.0.1:8000`. Use o mesmo endereço ao voltar para acessar os mesmos dados.
+O site não precisa de instalação nem de build. Rode `py -m http.server 8000 --bind 127.0.0.1` no Windows ou `python3 -m http.server 8000 --bind 127.0.0.1` e abra `http://127.0.0.1:8000`.
 
-Para rodar os testes de interface, use Node.js 22+ e Microsoft Edge ou Chrome com Chromium instalado. Execute `node --test tests/browser.test.mjs`. O teste inicia um servidor temporário e um perfil descartável. Se o navegador estiver fora dos caminhos padrão, informe o executável na variável `BROWSER_PATH`. Opcionalmente, defina `LOJA_TEST_URL` para testar uma publicação HTTPS. Todas as operações de teste ficam no perfil descartável.
+Com Node.js 22+ e Edge ou Chrome disponível, rode `node --test tests/browser.test.mjs`. A suíte inicia um servidor temporário e usa um perfil descartável. Defina `BROWSER_PATH` para selecionar o executável do navegador e `LOJA_TEST_URL` para executar os testes contra uma publicação.
 
-## Publicação no GitHub Pages
+## Publicação
 
-No repositório, abra **Settings → Pages**. Em **Build and deployment**, selecione **Deploy from a branch**, escolha **main** e **/(root)** e clique em **Save**. Confira a execução em **Actions** e abra o endereço que aparecer em **Settings → Pages**. Os caminhos do CSS e do JavaScript são relativos, adequados ao subdiretório do repositório. [Documentação do GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+O Cloudflare Pages do projeto está ligado ao repositório `SLU-369/controle-laranjinhas` e publica a raiz da branch `main` sem etapa de build. Após um push validado, confira o deploy e o endereço oficial. [Integração Git do Cloudflare Pages](https://developers.cloudflare.com/pages/configuration/git-integration/)

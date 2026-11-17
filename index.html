@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
-  <meta name="theme-color" content="#fff8f1">
+  <meta name="theme-color" content="#F5F3FF">
   <meta name="description" content="Controle de estoque, vendas e fiados da Loja da Gigi.">
   <title>Loja da Gigi · Estoque e Vendas</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Pular para o conteúdo</a>
@@ -39,28 +39,31 @@
       </section>
       <p class="notice" id="storageNotice" role="alert" hidden></p>
 
-      <div class="section-title"><h2>Visão geral</h2></div>
-      <section class="metrics" aria-label="Indicadores financeiros">
-        <article class="metric"><span>Unidades em estoque</span><strong id="units">—</strong><small id="flavorCount"></small></article>
-        <article class="metric"><span>Estoque · receita potencial</span><strong id="stockGross">—</strong><small>Aos preços atuais</small></article>
-        <article class="metric"><span>Estoque · custo estimado</span><strong id="stockCost">—</strong><small>Ao custo unitário atual</small></article>
-        <article class="metric accent"><span>Estoque · lucro bruto potencial</span><strong id="stockPotential">—</strong></article>
-        <article class="metric"><span>Vendas · receita bruta</span><strong id="soldValue">—</strong><small>Inclui fiados em aberto</small></article>
-        <article class="metric"><span>Vendas · custo dos produtos vendidos</span><strong id="soldCost">—</strong></article>
-        <article class="metric accent"><span>Vendas · lucro bruto estimado</span><strong id="profitValue">—</strong><small>Receita menos custo dos produtos vendidos</small></article>
-        <article class="metric"><span>Total recebido</span><strong id="receivedValue">—</strong></article>
-        <article class="metric"><span>Fiados a receber</span><strong id="dueValue">—</strong></article>
-      </section>
-
       <div class="two-col">
         <section class="panel" id="venda" aria-labelledby="sale-heading">
           <h2 id="sale-heading">Nova venda</h2>
           <form id="saleForm" class="form-grid">
-            <label class="full">Sabor<select id="saleFlavor" required></select></label>
-            <label>Quantidade<input id="saleQty" type="number" inputmode="numeric" min="1" max="99999" step="1" value="1" required aria-describedby="available"></label>
-            <label>Preço por unidade (R$)<input id="salePrice" type="number" inputmode="decimal" min="0.01" max="99999" step="0.01" required></label>
-            <small class="full muted field-help" id="available"></small>
-            <label class="full">Desconto no total (R$) <small>Opcional, inclusive para compras em quantidade.</small>
+            <div class="full sale-items" id="saleItems">
+              <div class="sale-item form-grid">
+                <label class="full">Sabor<select id="saleFlavor" data-flavor required></select></label>
+                <label>Quantidade<input id="saleQty" data-qty type="number" inputmode="numeric" min="1" max="99999" step="1" value="1" required aria-describedby="available"></label>
+                <label data-price-label>Preço por unidade (R$)<input id="salePrice" data-price type="number" inputmode="decimal" min="0.01" max="99999" step="0.01" required></label>
+                <small class="full muted field-help" id="available" data-available></small>
+              </div>
+            </div>
+            <button id="addSaleItem" class="btn btn-secondary full" type="button">Adicionar outro sabor</button>
+            <label class="full">Como definir o preço
+              <select id="salePricing" aria-describedby="promotionHelp">
+                <option value="unit">Preço por unidade</option>
+                <option value="promo">Promoção por quantidade</option>
+                <option value="total">Total manual</option>
+              </select>
+            </label>
+            <small class="full muted field-help" id="promotionHelp" hidden>1 por R$ 15,00 · 2 por R$ 26,00 · 3 por R$ 30,00. Para 4 ou mais, escolha um preço manual.</small>
+            <label class="full" id="manualTotalWrap" hidden>Total combinado antes do desconto (R$)
+              <input id="manualTotal" type="number" inputmode="decimal" min="0.01" step="0.01" disabled>
+            </label>
+            <label class="full" id="discountWrap">Desconto no total (R$) <small>Opcional</small>
               <input id="saleDiscount" type="number" inputmode="decimal" min="0" step="0.01">
             </label>
             <label class="full">Forma de pagamento
@@ -68,10 +71,16 @@
                 <option value="pix">Pix</option><option value="credit">Cartão de crédito</option><option value="debit">Cartão de débito</option><option value="cash">Dinheiro</option><option value="fiado">Fiado</option>
               </select>
             </label>
+            <label id="buyerWrap" class="full" hidden>Nome do comprador (opcional)
+              <input id="saleBuyer" maxlength="80" autocomplete="off" disabled>
+            </label>
             <label id="phoneWrap" class="full" hidden>Telefone com DDD
               <input id="salePhone" type="tel" inputmode="tel" autocomplete="off" maxlength="25" disabled>
             </label>
-            <div class="full sale-total"><span>Total desta venda</span><strong id="saleTotal">—</strong><small id="saleProfit"></small></div>
+            <div class="full sale-total">
+              <span>Total desta venda</span><strong id="saleTotal">—</strong>
+              <small id="saleBreakdown"></small><small id="saleProfit"></small>
+            </div>
             <button class="btn btn-primary full" type="submit" disabled>Confirmar venda</button>
           </form>
         </section>
@@ -99,6 +108,19 @@
         </div>
       </div>
 
+      <div class="section-title"><h2>Visão geral</h2></div>
+      <section class="metrics" aria-label="Indicadores financeiros">
+        <article class="metric"><span>Unidades em estoque</span><strong id="units">—</strong><small id="flavorCount"></small></article>
+        <article class="metric"><span>Estoque · receita potencial</span><strong id="stockGross">—</strong><small>Aos preços atuais</small></article>
+        <article class="metric"><span>Estoque · custo estimado</span><strong id="stockCost">—</strong><small>Ao custo unitário atual</small></article>
+        <article class="metric accent"><span>Estoque · lucro bruto potencial</span><strong id="stockPotential">—</strong></article>
+        <article class="metric"><span>Vendas · receita bruta</span><strong id="soldValue">—</strong><small>Inclui fiados em aberto</small></article>
+        <article class="metric"><span>Vendas · custo dos produtos vendidos</span><strong id="soldCost">—</strong></article>
+        <article class="metric accent"><span>Ganho estimado nas vendas</span><strong id="profitValue">—</strong><small>Receita menos custo dos produtos vendidos, antes de outras despesas</small></article>
+        <article class="metric"><span>Total recebido</span><strong id="receivedValue">—</strong></article>
+        <article class="metric"><span>Fiados a receber</span><strong id="dueValue">—</strong></article>
+      </section>
+
       <section class="panel" id="estoque" aria-labelledby="stock-heading">
         <div class="section-title"><h2 id="stock-heading">Estoque e sabores</h2><span id="stockInfo"></span></div>
         <form id="addForm" class="add-grid">
@@ -120,13 +142,40 @@
         <button id="moreSales" class="mini-btn more" type="button" hidden>Mostrar mais vendas</button>
       </section>
       <section class="panel" id="relatorios" aria-labelledby="report-heading">
-        <h2 id="report-heading">Relatórios e backup</h2>
+        <h2 id="report-heading">Fechamento de caixa e relatórios</h2>
+        <label class="period-select">Período
+          <select id="reportPeriod"><option value="today">Hoje</option><option value="week">Semana</option><option value="month">Mês</option><option value="custom">Período personalizado</option></select>
+        </label>
         <div class="report-grid">
           <label>De<input id="dateFrom" type="date"></label>
           <label>Até<input id="dateTo" type="date"></label>
           <button id="exportCsv" class="btn btn-primary" type="button">Exportar vendas (CSV)</button>
         </div>
-        <p class="muted">Selecione a mesma data nos dois campos para exportar um dia. Deixe ambos vazios para exportar todo o histórico. As datas filtram o dia da venda.</p>
+        <p class="muted">As vendas entram pela data da venda, e os recebimentos pela data de pagamento. Deixe as duas datas vazias no período personalizado para ver todo o histórico.</p>
+        <p class="form-error" id="reportError" role="alert"></p>
+        <div id="reportResult">
+          <dl class="report-totals">
+            <div><dt>Unidades vendidas</dt><dd id="reportQty">—</dd></div>
+            <div><dt>Receita bruta</dt><dd id="reportGross">—</dd></div>
+            <div><dt>Total recebido</dt><dd id="reportReceived">—</dd></div>
+            <div><dt>Pix recebido</dt><dd id="reportPix">—</dd></div>
+            <div><dt>Crédito recebido</dt><dd id="reportCredit">—</dd></div>
+            <div><dt>Débito recebido</dt><dd id="reportDebit">—</dd></div>
+            <div><dt>Dinheiro recebido</dt><dd id="reportCash">—</dd></div>
+            <div id="reportUnknownRow" hidden><dt>Recebido · modalidade desconhecida</dt><dd id="reportUnknown">—</dd></div>
+            <div><dt>Recebimentos de fiados anteriores ao período</dt><dd id="reportEarlier">—</dd></div>
+            <div><dt>Fiados pendentes ao fim do período</dt><dd id="reportDue">—</dd></div>
+            <div><dt>Custo dos produtos vendidos</dt><dd id="reportCost">—</dd></div>
+            <div class="positive"><dt>Ganho estimado nas vendas</dt><dd id="reportProfit">—</dd></div>
+          </dl>
+          <p class="muted" id="reportUndated" hidden>Há recebimentos antigos com data desconhecida. Eles contam para o saldo do fiado e aparecem nos recebimentos apenas na consulta sem datas.</p>
+          <div class="chart-grid">
+            <section aria-labelledby="top-flavors-heading"><h3 id="top-flavors-heading">Sabores mais vendidos</h3><ul class="chart" id="topFlavors"></ul></section>
+            <section aria-labelledby="sales-chart-heading"><h3 id="sales-chart-heading">Evolução das vendas</h3><ul class="chart" id="salesChart"></ul></section>
+          </div>
+        </div>
+        <h3 class="backup-heading">Backup</h3>
+        <p id="lastBackup" class="muted"></p>
         <div class="backup-actions">
           <button id="exportJson" class="btn btn-secondary" type="button">Exportar backup (JSON)</button>
           <button id="chooseBackup" class="btn btn-secondary" type="button">Importar backup (JSON)</button>
