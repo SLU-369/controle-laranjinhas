@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta name="theme-color" content="#fff8f1">
+  <meta name="description" content="Controle de estoque, vendas e fiados da Loja da Gigi.">
+  <title>Loja da Gigi · Estoque e Vendas</title>
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Pular para o conteúdo</a>
+  <div class="app">
+    <header class="topbar">
+      <a class="brand" href="#main"><span class="brand-mark" aria-hidden="true">🍧</span> Loja da Gigi</a>
+      <label class="profile">Quem está usando?
+        <select id="userChoice">
+          <option value="">Escolher nome</option>
+          <option>Samuel</option>
+          <option>Giovana</option>
+        </select>
+      </label>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <noscript><p class="notice">Ative o JavaScript para usar o estoque e registrar vendas.</p></noscript>
+      <section class="hero" aria-labelledby="greeting">
+        <div>
+          <h1 id="greeting">Boas-vindas à Loja da Gigi!</h1>
+          <nav aria-label="Atalhos da loja" class="hero-actions">
+            <a href="#venda" class="btn btn-light">Registrar venda</a>
+            <a href="#estoque" class="btn btn-outline">Ver estoque</a>
+            <a href="#relatorios" class="btn btn-outline">Relatórios</a>
+          </nav>
+        </div>
+        <div class="hero-graphic" aria-hidden="true">🍊</div>
+      </section>
+      <p class="notice" id="storageNotice" role="alert" hidden></p>
+
+      <div class="section-title"><h2>Visão geral</h2></div>
+      <section class="metrics" aria-label="Indicadores financeiros">
+        <article class="metric"><span>Unidades em estoque</span><strong id="units">—</strong><small id="flavorCount"></small></article>
+        <article class="metric"><span>Estoque · receita potencial</span><strong id="stockGross">—</strong><small>Aos preços atuais</small></article>
+        <article class="metric"><span>Estoque · custo estimado</span><strong id="stockCost">—</strong><small>Ao custo unitário atual</small></article>
+        <article class="metric accent"><span>Estoque · lucro bruto potencial</span><strong id="stockPotential">—</strong></article>
+        <article class="metric"><span>Vendas · receita bruta</span><strong id="soldValue">—</strong><small>Inclui fiados em aberto</small></article>
+        <article class="metric"><span>Vendas · custo dos produtos vendidos</span><strong id="soldCost">—</strong></article>
+        <article class="metric accent"><span>Vendas · lucro bruto estimado</span><strong id="profitValue">—</strong><small>Receita menos custo dos produtos vendidos</small></article>
+        <article class="metric"><span>Total recebido</span><strong id="receivedValue">—</strong></article>
+        <article class="metric"><span>Fiados a receber</span><strong id="dueValue">—</strong></article>
+      </section>
+
+      <div class="two-col">
+        <section class="panel" id="venda" aria-labelledby="sale-heading">
+          <h2 id="sale-heading">Nova venda</h2>
+          <form id="saleForm" class="form-grid">
+            <label class="full">Sabor<select id="saleFlavor" required></select></label>
+            <label>Quantidade<input id="saleQty" type="number" inputmode="numeric" min="1" max="99999" step="1" value="1" required aria-describedby="available"></label>
+            <label>Preço por unidade (R$)<input id="salePrice" type="number" inputmode="decimal" min="0.01" max="99999" step="0.01" required></label>
+            <small class="full muted field-help" id="available"></small>
+            <label class="full">Desconto no total (R$) <small>Opcional, inclusive para compras em quantidade.</small>
+              <input id="saleDiscount" type="number" inputmode="decimal" min="0" step="0.01">
+            </label>
+            <label class="full">Forma de pagamento
+              <select id="saleMethod">
+                <option value="pix">Pix</option><option value="credit">Cartão de crédito</option><option value="debit">Cartão de débito</option><option value="cash">Dinheiro</option><option value="fiado">Fiado</option>
+              </select>
+            </label>
+            <label id="phoneWrap" class="full" hidden>Telefone com DDD
+              <input id="salePhone" type="tel" inputmode="tel" autocomplete="off" maxlength="25" disabled>
+            </label>
+            <div class="full sale-total"><span>Total desta venda</span><strong id="saleTotal">—</strong><small id="saleProfit"></small></div>
+            <button class="btn btn-primary full" type="submit" disabled>Confirmar venda</button>
+          </form>
+        </section>
+        <div>
+          <section class="panel" aria-labelledby="settings-heading">
+            <h2 id="settings-heading">Configuração de valores</h2>
+            <form id="settingsForm" class="form-grid">
+              <label>Preço padrão (R$)<input id="defaultPrice" type="number" inputmode="decimal" step="0.01" min="0.01" max="99999" required></label>
+              <label>Custo por unidade (R$)<input id="unitCost" type="number" inputmode="decimal" step="0.01" min="0" max="99999" required></label>
+              <button class="btn btn-primary full" type="submit">Salvar valores padrão</button>
+            </form>
+            <p class="muted">Ao alterar o preço padrão, atualizamos os sabores com o mesmo preço anterior. Cada venda guarda seus próprios valores.</p>
+            <p class="note">O lucro bruto estimado desconta o custo de produção. Taxas de cartão, transporte e outras despesas ficam fora do cálculo.</p>
+          </section>
+          <section class="panel" aria-labelledby="payments-heading">
+            <h2 id="payments-heading">Recebimentos por modalidade</h2>
+            <div class="payment-grid">
+              <div><span>Pix</span><strong id="pixValue">—</strong></div>
+              <div><span>Crédito</span><strong id="creditValue">—</strong></div>
+              <div><span>Débito</span><strong id="debitValue">—</strong></div>
+              <div><span>Dinheiro</span><strong id="cashValue">—</strong></div>
+              <div id="legacyPayment" hidden><span>Modalidade desconhecida</span><strong id="unknownValue">—</strong></div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <section class="panel" id="estoque" aria-labelledby="stock-heading">
+        <div class="section-title"><h2 id="stock-heading">Estoque e sabores</h2><span id="stockInfo"></span></div>
+        <form id="addForm" class="add-grid">
+          <label>Novo sabor<input id="newName" maxlength="80" required></label>
+          <label>Quantidade inicial<input id="newQty" type="number" inputmode="numeric" min="0" max="99999" step="1" value="0" required></label>
+          <label>Preço por unidade (R$)<input id="newPrice" type="number" inputmode="decimal" min="0.01" max="99999" step="0.01" required></label>
+          <button type="submit" class="btn btn-primary">Adicionar sabor</button>
+        </form>
+        <div id="flavorGrid" class="flavors"></div>
+      </section>
+      <section class="panel" id="fiados" aria-labelledby="debt-heading">
+        <h2 id="debt-heading" tabindex="-1">Fiados em aberto</h2>
+        <div id="debtList" class="entries"></div>
+        <button id="moreDebts" class="mini-btn more" type="button" hidden>Mostrar mais fiados</button>
+      </section>
+      <section class="panel" id="historico" aria-labelledby="history-heading">
+        <h2 id="history-heading" tabindex="-1">Histórico de vendas</h2>
+        <div id="historyList" class="entries"></div>
+        <button id="moreSales" class="mini-btn more" type="button" hidden>Mostrar mais vendas</button>
+      </section>
+      <section class="panel" id="relatorios" aria-labelledby="report-heading">
+        <h2 id="report-heading">Relatórios e backup</h2>
+        <div class="report-grid">
+          <label>De<input id="dateFrom" type="date"></label>
+          <label>Até<input id="dateTo" type="date"></label>
+          <button id="exportCsv" class="btn btn-primary" type="button">Exportar vendas (CSV)</button>
+        </div>
+        <p class="muted">Selecione a mesma data nos dois campos para exportar um dia. Deixe ambos vazios para exportar todo o histórico. As datas filtram o dia da venda.</p>
+        <div class="backup-actions">
+          <button id="exportJson" class="btn btn-secondary" type="button">Exportar backup (JSON)</button>
+          <button id="chooseBackup" class="btn btn-secondary" type="button">Importar backup (JSON)</button>
+          <input id="importJson" type="file" accept=".json,application/json" hidden>
+          <button id="reset" class="btn btn-danger" type="button">Restaurar dados iniciais</button>
+        </div>
+        <p class="muted">O JSON guarda estoque, vendas, ajustes e perfil. A restauração usa os dados do arquivo. Os arquivos podem conter telefones de clientes, guarde-os com cuidado.</p>
+      </section>
+    </main>
+    <footer>Loja da Gigi <span>Dados salvos neste navegador, sem sincronização entre dispositivos.</span></footer>
+  </div>
+
+  <dialog id="profileDialog" aria-labelledby="profile-heading">
+    <h2 id="profile-heading">Quem está usando?</h2>
+    <div class="dialog-actions">
+      <button class="btn btn-primary" id="chooseSamuel" type="button" autofocus>Samuel</button>
+      <button class="btn btn-primary" id="chooseGiovana" type="button">Giovana</button>
+      <button class="btn btn-secondary" id="skipProfile" type="button">Agora não</button>
+    </div>
+    <p id="profileError" class="form-error" role="alert"></p>
+  </dialog>
+
+  <dialog id="editDialog" aria-labelledby="edit-heading">
+    <h2 id="edit-heading">Editar sabor</h2>
+    <form id="editForm" class="form-grid">
+      <label class="full">Nome<input id="editName" maxlength="80" required autofocus></label>
+      <label>Quantidade disponível<input id="editQty" type="number" inputmode="numeric" min="0" max="99999" step="1" required></label>
+      <label>Preço por unidade (R$)<input id="editPrice" type="number" inputmode="decimal" min="0.01" max="99999" step="0.01" required></label>
+      <p class="form-error full" id="editError" role="alert"></p>
+      <div class="dialog-actions full">
+        <button class="btn btn-secondary" id="closeEdit" type="button">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Salvar sabor</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="restoreDialog" aria-labelledby="restoreHeading" aria-describedby="restoreDetails">
+    <h2 id="restoreHeading">Restaurar dados</h2>
+    <p id="restoreDetails"></p>
+    <form id="restoreForm" class="form-grid">
+      <label class="full">Digite <strong id="restoreWord"></strong> para confirmar
+        <input id="restoreInput" autocomplete="off" spellcheck="false" required>
+      </label>
+      <p class="form-error full" id="restoreError" role="alert"></p>
+      <div class="dialog-actions full">
+        <button class="btn btn-secondary" id="closeRestore" type="button" autofocus>Cancelar</button>
+        <button class="btn btn-secondary" id="saveBeforeRestore" type="button">Baixar cópia local</button>
+        <button class="btn btn-danger" id="applyRestore" type="submit">Confirmar restauração</button>
+      </div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-atomic="true"></div>
+</body>
+</html>
