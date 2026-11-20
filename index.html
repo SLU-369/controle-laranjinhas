@@ -3,12 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; manifest-src 'self'; worker-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
   <meta name="theme-color" content="#F5F3FF">
   <meta name="description" content="Controle de estoque, vendas e fiados da Loja da Gigi.">
   <title>Loja da Gigi · Estoque e Vendas</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="stylesheet" href="style.css">
   <script type="module" src="script.js"></script>
+  <script type="module" src="pwa.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Pular para o conteúdo</a>
@@ -38,6 +42,19 @@
         <div class="hero-graphic" aria-hidden="true">🍊</div>
       </section>
       <p class="notice" id="storageNotice" role="alert" hidden></p>
+      <section class="pwa-panel" aria-label="Aplicativo da loja">
+        <div class="pwa-actions">
+          <p id="pwaStatus" class="muted" role="status" hidden></p>
+          <button id="installApp" class="btn btn-secondary" type="button" hidden>Instalar aplicativo</button>
+          <details id="installHelp">
+            <summary>Como instalar</summary>
+            <p id="installInstructions">No Android, abra o menu do Chrome e escolha Instalar aplicativo ou Adicionar à tela inicial. No computador, use a opção de instalar na barra de endereços do Edge ou Chrome. No iPhone, abra no Safari, toque em Compartilhar e em Adicionar à Tela de Início.</p>
+            <p>Abra a loja com internet e aguarde a confirmação de que está pronta para usar offline. Antes de instalar, exporte um backup JSON. Se o aplicativo abrir sem seu histórico, importe essa cópia; os dados podem ficar separados dos dados do navegador.</p>
+          </details>
+        </div>
+        <p id="installMessage" role="status" hidden></p>
+        <p id="pwaUpdate" class="notice" role="status" hidden></p>
+      </section>
 
       <div class="two-col">
         <section class="panel" id="venda" aria-labelledby="sale-heading">
@@ -185,7 +202,7 @@
         <p class="muted">O JSON guarda estoque, vendas, ajustes e perfil. A restauração usa os dados do arquivo. Os arquivos podem conter telefones de clientes, guarde-os com cuidado.</p>
       </section>
     </main>
-    <footer>Loja da Gigi <span>Dados salvos neste navegador, sem sincronização entre dispositivos.</span></footer>
+    <footer>Loja da Gigi · 1.2 <span>Dados salvos neste navegador, sem sincronização entre dispositivos.</span></footer>
   </div>
 
   <dialog id="profileDialog" aria-labelledby="profile-heading">

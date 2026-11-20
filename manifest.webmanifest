@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Loja da Gigi",
+  "short_name": "Loja da Gigi",
+  "description": "Estoque, vendas e fiados da Loja da Gigi, com uso offline neste aparelho.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F3FF",
+  "theme_color": "#F5F3FF",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
